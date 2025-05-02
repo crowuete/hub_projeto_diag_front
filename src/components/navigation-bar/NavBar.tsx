@@ -69,6 +69,7 @@ export default function Navbar() {
         <>
             <NavLink
                 isMobile={isMobile}
+                href='/'
                 onClick={() => {
                     handleLogout();
                     if (close) close();
