@@ -43,6 +43,13 @@ export const questionnaireApiSlice = apiSlice.injectEndpoints({
                 body: { respostas },
             }),
         }),
+        downloadReport: builder.mutation<Blob, string>({
+            query: (nomeModulo) => ({
+                url: `/modulos/${nomeModulo}/relatorio/`,
+                method: 'GET',
+                responseHandler: (response) => response.blob(),
+            }),
+        }),
     }),
 });
 
@@ -50,4 +57,5 @@ export const {
     useGetQuestionnairesQuery,
     useGetQuestionnaireByModuleQuery,
     useSaveModuleResponsesMutation,
+    useDownloadReportMutation,
 } = questionnaireApiSlice;

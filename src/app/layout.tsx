@@ -3,7 +3,7 @@ import type { Metadata } from 'next';
 import './globals.css';
 import NavBar from '@/components/navigation-bar/NavBar';
 import Footer from '@/components/footer/Footer';
-import { Setup } from '@/components/utils';
+import { Setup } from '@/utils';
 import { ThemeProvider, ToggleTheme } from '@/components/themes';
 import { Inter, Roboto_Mono } from 'next/font/google'
 

@@ -8,7 +8,12 @@ export const makeStore = () => configureStore({
         auth: authReducer,
     },
     middleware: getDefaultMiddleware =>
-        getDefaultMiddleware().concat(apiSlice.middleware),
+        getDefaultMiddleware({
+            serializableCheck: {
+                ignoredActions: ['api/executeMutation/fulfilled'],
+                ignoredPaths: ['api.mutations'],
+            },
+        }).concat(apiSlice.middleware),
     devTools: process.env.NODE_ENV !== 'production'
 })
 

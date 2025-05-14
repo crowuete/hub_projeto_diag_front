@@ -1,4 +1,3 @@
-import React, { useState } from 'react';
 import { AnimatedText, LikertScale } from '@/components/questionnaire';
 
 interface QuestionWithLikertProps {
@@ -15,7 +14,9 @@ export default function QuestionWithLikert({ question, numOptions, selectedOptio
 
     return (
         <div className='flex flex-col w-full items-center space-y-6 md:space-y-8 lg:space-y-12'>
-            <AnimatedText text={question} />
+            <p className={`text-xl sm:text-2xl font-bold text-center`}>
+                {question}
+            </p>
             <LikertScale
                 numOptions={numOptions}
                 selectedOption={selectedOption}

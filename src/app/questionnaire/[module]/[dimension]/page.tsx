@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useParams } from 'next/navigation';
 import { useSubmitResponses } from '@/hooks';
-import { useGetQuestionnaireByModuleQuery } from '@/redux/features/questionnaireApiSlice';
+import { useGetQuestionnaireByModuleQuery, useDownloadReportMutation } from '@/redux/features/questionnaireApiSlice';
 import { QuestionWithLikert } from '@/components/questionnaire';
 import { Check, ChevronLeft, ChevronRight } from 'lucide-react';
 
@@ -127,20 +127,42 @@ export default function Page() {
         </div>
     );
 
-    const SubmitView = () => (
-        <div className='flex flex-col items-center px-3 py-10 sm:px-6 md:px-10'>
-            <div className='rounded-full border-2 border-turquoise p-4 mb-8'>
-                <Check className='text-turquoise h-16 w-16' />
+    const SubmitView = () => {
+        const [downloadReport] = useDownloadReportMutation();
+
+        const handleSubmitAndDownload = async () => {
+            try {
+                await handleSubmitResponses(moduleName as string);
+
+                const blob = await downloadReport('Diagnóstico Organizacional').unwrap();
+                const url = window.URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = 'relatorio_diagnostico_organizacional.pdf';
+                document.body.appendChild(link);
+                link.click();
+                link.remove();
+                window.URL.revokeObjectURL(url);
+            } catch (error) {
+                console.error('Erro ao enviar respostas ou baixar o relatório:', error);
+            }
+        };
+
+        return (
+            <div className='flex flex-col items-center px-3 py-10 sm:px-6 md:px-10'>
+                <div className='rounded-full border-2 border-turquoise p-4 mb-8'>
+                    <Check className='text-turquoise h-16 w-16' />
+                </div>
+                <h1 className='text-2xl sm:text-3xl md:text-5xl font-extrabold mb-16'> Questionário Finalizado! </h1>
+                <button
+                    className='px-6 py-3 bg-turquoise rounded-md text-black-wash'
+                    onClick={handleSubmitAndDownload} // Substituí o evento onClick
+                >
+                    Enviar Respostas e Baixar Relatório
+                </button>
             </div>
-            <h1 className='text-2xl sm:text-3xl md:text-5xl font-extrabold mb-16'> Questionário Finalizado! </h1>
-            <button
-                className='px-6 py-3 bg-turquoise rounded-md text-black-wash'
-                onClick={() => handleSubmitResponses(moduleName as string)}
-            >
-                Enviar Respostas
-            </button>
-        </div>
-    );
+        );
+    };
 
     const NavigationButton = ({
         onClick,
