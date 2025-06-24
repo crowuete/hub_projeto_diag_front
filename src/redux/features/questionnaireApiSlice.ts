@@ -28,6 +28,13 @@ interface RespostaModulo {
     valor: number;
 }
 
+export interface Report {
+    user: string;
+    modulo: string;
+    valor_final: number;
+    data_resposta: number;
+}
+
 export const questionnaireApiSlice = apiSlice.injectEndpoints({
     endpoints: (builder) => ({
         getQuestionnaires: builder.query<Dimensao[], void>({
@@ -50,6 +57,10 @@ export const questionnaireApiSlice = apiSlice.injectEndpoints({
                 responseHandler: (response) => response.blob(),
             }),
         }),
+        searchReport: builder.query<Report[], string>({
+            query: (data) => `/relatorios/?data=${data}`,
+            transformResponse: (response: { resultados: Report[] }) => response.resultados,
+        }),
     }),
 });
 
@@ -58,4 +69,6 @@ export const {
     useGetQuestionnaireByModuleQuery,
     useSaveModuleResponsesMutation,
     useDownloadReportMutation,
+    useSearchReportQuery,
+    useLazySearchReportQuery, 
 } = questionnaireApiSlice;

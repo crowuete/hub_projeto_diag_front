@@ -15,24 +15,24 @@ export default {
       },
       colors: {
         // white 
-        'bleached-silk': '#F2F2F2',
-        'off-white': '#f4f2ee',
+        'bleached-silk': ' #F2F2F2',
+        'off-white': ' #f4f2ee',
 
         // gray
-        'gray-light': '#D9D9D9',
+        'gray-light': ' #D9D9D9',
 
         // black
-        'black-wash': '#0D0D0D',
+        'black-wash': ' #0D0D0D',
 
         // blue
-        'blue-darknut': '#058AFF',
-        'vivid-cerulean': '#05AFF2',
-        'royal-blue': '#00247c',
+        'blue-darknut': ' #058AFF',
+        'vivid-cerulean': ' #05AFF2',
+        'royal-blue': ' #00247c',
 
         // dark blue
-        'gunmetal': '#121826',
-        'dark-navy-blue': '#0F1117',
-        'midnight-blue': '#030712',
+        'gunmetal': ' #121826',
+        'dark-navy-blue': ' #0F1117',
+        'midnight-blue': ' #030712',
 
         //green
         'turquoise': '#2bfdbe',
