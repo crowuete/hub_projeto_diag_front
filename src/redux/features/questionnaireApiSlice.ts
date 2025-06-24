@@ -29,10 +29,11 @@ interface RespostaModulo {
 }
 
 export interface Report {
-    user: string;
-    modulo: string;
-    valor_final: number;
-    data_resposta: number;
+    id: number;
+    usuario: string;
+    nome_modulo: string;
+    valorFinal: number;
+    dataResposta: number;
 }
 
 export const questionnaireApiSlice = apiSlice.injectEndpoints({
