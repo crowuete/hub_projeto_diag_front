@@ -1,21 +1,22 @@
 'use client'
 import { useState } from 'react'
-import {useLazySearchReportQuery, useDownloadReportMutation} from '@/redux/features/questionnaireApiSlice';
+import {useLazySearchReportQuery, useDownloadReportMutation, useGetRelatorioDatesQuery} from '@/redux/features/questionnaireApiSlice';
 import type { Report } from '@/redux/features/questionnaireApiSlice'
+import DropdownMenu from "@/components/questionnaire/DropdownMenu"; 
 
 export default function Dashboard(){
 
   const [dateSelection, setDateSelection] = useState('')
   const [report, setReport] = useState<Report[] | null>(null)
-
-  const [getReport, { isLoading:isLoadingReport, error:errorReport }] = useLazySearchReportQuery();
+  const [getReport, {error:errorReport }] = useLazySearchReportQuery();
   const [downloadReport] = useDownloadReportMutation()
-
+  const { data: availableDates = []} = useGetRelatorioDatesQuery();
 
   const handleSearch = async () => {
     if (!dateSelection) return
 
-    const response = await getReport(dateSelection)
+    const formattedDate = new Date(dateSelection).toISOString().slice(0, 10);
+    const response = await getReport(formattedDate)
 
     if ('data' in response && response.data) {
       setReport(response.data)
@@ -41,7 +42,6 @@ export default function Dashboard(){
     }
   };
 
-
   return (
     <div className='flex flex-col w-full space-y-8 md:space-y-12 p-12'>
       <div className='border border-black-wash p-4 m-10 text-center'>
@@ -50,16 +50,21 @@ export default function Dashboard(){
       <div className='border border-black-wash p-4 m-10 rounded-md bg-gray-50 shadow-sm'>
         <h2 className="text-xl font-semibold mb-4">Gerar Relatório</h2>
         <div className="flex space-x-2 mb-4">
-          <input
-            type="date"
+          <select
             value={dateSelection}
             onChange={(e) => setDateSelection(e.target.value)}
             className="flex-grow px-4 py-2 border rounded-md focus:outline-none focus:ring focus:ring-teal-500"
-          />
+          >
+            <option value="">Selecione uma data</option>
+            {availableDates.map((date) => (
+              <option key={date} value={date}>
+                {new Date(date).toLocaleDateString("pt-BR")}
+              </option>
+            ))}
+          </select>
            <button onClick={handleSearch} className="px-4 py-2 bg-teal-600 text-white rounded-md hover:bg-teal-700" > Buscar Relatório  </button>
         </div>
 
-        {isLoadingReport && <p>Carregando...</p>}
         {errorReport && <p className="text-red-500">Erro ao buscar relatórios.</p>}
 
         {report && report.length > 0 && (
@@ -77,14 +82,8 @@ export default function Dashboard(){
                 <div>{item.nome_modulo}</div>
                 <div>{item.valorFinal}</div>
                 <div>{item.dataResposta}</div>
-                <div className='flex space-x gap-2'>
-                  <button 
-                    onClick={() => handleDownload(item.id.toString())} 
-                    className="w-40 h-10 px-4 bg-gray-600 text-white rounded-md hover:bg-gray-700"
-                  > Baixar </button>
-                  <button // onClick={handleDownload} 
-                    className="w-40 h-10 px-4 bg-gray-600 text-white rounded-md hover:bg-gray-700"
-                  > Vizualizar </button>
+                <div className='flex space-x gap-2 justify-end'>
+                  <DropdownMenu item={item} handleDownload={handleDownload}/>
                 </div>
               </div>
             ))}

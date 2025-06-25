@@ -11,13 +11,14 @@
   "dependencies": {
     "@headlessui/react": "^2.2.0",
     "@reduxjs/toolkit": "^2.6.1",
+    "@visx/visx": "^3.12.0",
     "async-mutex": "^0.5.0",
     "classnames": "^2.5.1",
     "lucide-react": "^0.475.0",
     "next": "^15.3.3",
     "next-themes": "^0.4.6",
-    "react": "^19.0.0",
-    "react-dom": "^19.0.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
     "react-redux": "^9.2.0",
     "react-toastify": "^11.0.5",
     "react-type-animation": "^3.2.0"

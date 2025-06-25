@@ -62,6 +62,13 @@ export const questionnaireApiSlice = apiSlice.injectEndpoints({
             query: (data) => `/relatorios/?data=${data}`,
             transformResponse: (response: { resultados: Report[] }) => response.resultados,
         }),
+        checkDeadline: builder.query<{ ok_response: boolean; message: string }, string | void>({
+            query: (idModulo) => `/questionario/${idModulo}/check_deadline/`,
+        }),
+        getRelatorioDates: builder.query<string[], void>({
+            query: () => '/relatorios/datas/',
+        }),
+
     }),
 });
 
@@ -72,4 +79,6 @@ export const {
     useDownloadReportMutation,
     useSearchReportQuery,
     useLazySearchReportQuery, 
+    useCheckDeadlineQuery,
+    useGetRelatorioDatesQuery
 } = questionnaireApiSlice;
