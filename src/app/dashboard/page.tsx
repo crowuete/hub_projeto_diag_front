@@ -3,6 +3,7 @@ import { useState } from 'react'
 import {useLazySearchReportQuery, useDownloadReportMutation, useGetRelatorioDatesQuery} from '@/redux/features/questionnaireApiSlice';
 import type { Report } from '@/redux/features/questionnaireApiSlice'
 import DropdownMenu from "@/components/questionnaire/DropdownMenu"; 
+import TrendChart from "@/components/graphic/TrendChard"; 
 
 export default function Dashboard(){
 
@@ -10,7 +11,8 @@ export default function Dashboard(){
   const [report, setReport] = useState<Report[] | null>(null)
   const [getReport, {error:errorReport }] = useLazySearchReportQuery();
   const [downloadReport] = useDownloadReportMutation()
-  const { data: availableDates = []} = useGetRelatorioDatesQuery();
+  const { data: availableDatesRaw = [] } = useGetRelatorioDatesQuery();
+  const availableDates = availableDatesRaw.map((item) => item.data)
 
   const handleSearch = async () => {
     if (!dateSelection) return
@@ -44,8 +46,13 @@ export default function Dashboard(){
 
   return (
     <div className='flex flex-col w-full space-y-8 md:space-y-12 p-12'>
-      <div className='border border-black-wash p-4 m-10 text-center'>
-        <h1>GRÁFICO DE COMPARAÇÃO</h1>
+      <div className='p-4 m-10 text-center'>
+        <h1 className="text-4xl font-bold text-royal-blue border-b-2 border-royal-blue pb-2 mb-10">
+          Gráfico de Evolução
+        </h1>
+        <div className="flex justify-center">
+        <TrendChart />
+      </div>
       </div>
       <div className='border border-black-wash p-4 m-10 rounded-md bg-gray-50 shadow-sm'>
         <h2 className="text-xl font-semibold mb-4">Gerar Relatório</h2>

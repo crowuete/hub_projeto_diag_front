@@ -36,6 +36,11 @@ export interface Report {
     dataResposta: number;
 }
 
+export interface RelatorioDate {
+  data: string;
+  valorFinal: number;
+}
+
 export const questionnaireApiSlice = apiSlice.injectEndpoints({
     endpoints: (builder) => ({
         getQuestionnaires: builder.query<Dimensao[], void>({
@@ -65,7 +70,7 @@ export const questionnaireApiSlice = apiSlice.injectEndpoints({
         checkDeadline: builder.query<{ ok_response: boolean; message: string }, string | void>({
             query: (idModulo) => `/questionario/${idModulo}/check_deadline/`,
         }),
-        getRelatorioDates: builder.query<string[], void>({
+        getRelatorioDates: builder.query<RelatorioDate[], void>({
             query: () => '/relatorios/datas/',
         }),
 
