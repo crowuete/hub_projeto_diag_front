@@ -26,7 +26,7 @@ export default function DropdownMenu({ item, handleDownload, handleVisualizar }:
         onClick={() => setOpen(!open)}
         aria-haspopup="true"
         aria-expanded={open}
-        className="w-10 h-10 flex items-center justify-center rounded-md hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-teal-500"
+        className="w-10 h-10 flex items-center justify-center rounded-md hover:bg-gray-200 focus:outline-none focus:ring-2 focus:royal-blue"
         aria-label="Abrir menu"
       >
         {/* Três pontinhos verticais */}
@@ -40,7 +40,7 @@ export default function DropdownMenu({ item, handleDownload, handleVisualizar }:
               handleDownload(item.id.toString());
               setOpen(false);
             }}
-            className="block w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100"
+            className="block w-full px-4 py-2 text-gray-700 text-center hover:bg-gray-100 border-b-2 border-blue-darknut"
           >
             Baixar
           </button>
@@ -49,7 +49,7 @@ export default function DropdownMenu({ item, handleDownload, handleVisualizar }:
               if (handleVisualizar) handleVisualizar();
               setOpen(false);
             }}
-            className="block w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100"
+            className="block w-full text-center px-4 py-2 text-gray-700 hover:bg-gray-100"
           >
             Visualizar
           </button>

@@ -41,6 +41,13 @@ export interface RelatorioDate {
   valorFinal: number;
 }
 
+export interface ResultadoDimensao {
+  dimensao: string;
+  valorFinal: number;
+  data: string;
+}
+
+
 export const questionnaireApiSlice = apiSlice.injectEndpoints({
     endpoints: (builder) => ({
         getQuestionnaires: builder.query<Dimensao[], void>({
@@ -73,6 +80,9 @@ export const questionnaireApiSlice = apiSlice.injectEndpoints({
         getRelatorioDates: builder.query<RelatorioDate[], void>({
             query: () => '/relatorios/datas/',
         }),
+        getDimensoes: builder.query<ResultadoDimensao[], void>({
+            query: () => '/relatorios/dimensoes/',
+        }),
 
     }),
 });
@@ -85,5 +95,6 @@ export const {
     useSearchReportQuery,
     useLazySearchReportQuery, 
     useCheckDeadlineQuery,
-    useGetRelatorioDatesQuery
+    useGetRelatorioDatesQuery,
+    useGetDimensoesQuery
 } = questionnaireApiSlice;

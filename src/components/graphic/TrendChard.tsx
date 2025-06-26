@@ -27,7 +27,7 @@ const tooltipStyles = {
   boxShadow: "0 4px 8px rgba(0, 0, 0, 0.15)",
 };
 
-export default function TrendChartVisX() {
+export default function TrendChart() {
   const { data: availableDatesRaw = [] } = useGetRelatorioDatesQuery();
   const [rawData, setRawData] = useState<RelatorioDate[]>([]);
 

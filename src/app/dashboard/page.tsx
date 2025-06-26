@@ -4,6 +4,7 @@ import {useLazySearchReportQuery, useDownloadReportMutation, useGetRelatorioDate
 import type { Report } from '@/redux/features/questionnaireApiSlice'
 import DropdownMenu from "@/components/questionnaire/DropdownMenu"; 
 import TrendChart from "@/components/graphic/TrendChard"; 
+import BarChart from "@/components/graphic/BarChart"; 
 
 export default function Dashboard(){
 
@@ -46,21 +47,28 @@ export default function Dashboard(){
 
   return (
     <div className='flex flex-col w-full space-y-8 md:space-y-12 p-12'>
+      
       <div className='p-4 m-10 text-center'>
-        <h1 className="text-4xl font-bold text-royal-blue border-b-2 border-royal-blue pb-2 mb-10">
+         <h1 className="text-4xl font-bold text-royal-blue border-b-2 border-royal-blue pb-2 mb-10">
+          Gráfico de Comparação Empresarial
+        </h1>
+        <div className="flex justify-center">
+          <BarChart />
+        </div>
+        <h1 className="text-4xl font-bold text-royal-blue border-b-2 border-royal-blue pb-2 m-20">
           Gráfico de Evolução
         </h1>
         <div className="flex justify-center">
-        <TrendChart />
+          <TrendChart />
+        </div>
       </div>
-      </div>
-      <div className='border border-black-wash p-4 m-10 rounded-md bg-gray-50 shadow-sm'>
+      <div className='border-2 border-blue-darknut p-4 m-10 rounded-md bg-gray-50 shadow-sm'>
         <h2 className="text-xl font-semibold mb-4">Gerar Relatório</h2>
         <div className="flex space-x-2 mb-4">
           <select
             value={dateSelection}
             onChange={(e) => setDateSelection(e.target.value)}
-            className="flex-grow px-4 py-2 border rounded-md focus:outline-none focus:ring focus:ring-teal-500"
+            className="flex-grow px-4 py-2 border rounded-md focus:outline-none focus:ring focus:royal-blue"
           >
             <option value="">Selecione uma data</option>
             {availableDates.map((date) => (
@@ -69,7 +77,7 @@ export default function Dashboard(){
               </option>
             ))}
           </select>
-           <button onClick={handleSearch} className="px-4 py-2 bg-teal-600 text-white rounded-md hover:bg-teal-700" > Buscar Relatório  </button>
+           <button onClick={handleSearch} className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600" > Buscar Relatório  </button>
         </div>
 
         {errorReport && <p className="text-red-500">Erro ao buscar relatórios.</p>}
