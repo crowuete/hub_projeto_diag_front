@@ -1,20 +1,17 @@
-// components/BarChart.tsx
 "use client";
 
-import React, { useEffect, useState } from "react";
 import { scaleLinear, scaleBand } from "@visx/scale";
 import { Group } from "@visx/group";
 import { AxisLeft, AxisBottom } from "@visx/axis";
 import { GridRows, GridColumns } from "@visx/grid";
 import { Tooltip, useTooltip, defaultStyles } from "@visx/tooltip";
 import { localPoint } from "@visx/event";
-import { motion } from "framer-motion";
 import type { ResultadoDimensao } from "@/redux/features/questionnaireApiSlice";
 import { useGetDimensoesQuery } from "@/redux/features/questionnaireApiSlice";
 
-const width = 800;
-const height = 400;
-const margin = { top: 20, right: 40, bottom: 10, left: 60 };
+const width = 1000;
+const height = 600;
+const margin = { top: 30, right: 60, bottom: 120, left: 40 };
 
 const tooltipStyles = {
   ...defaultStyles,
@@ -26,21 +23,16 @@ const tooltipStyles = {
   boxShadow: "0 4px 8px rgba(0, 0, 0, 0.15)",
 };
 
-
 export default function BarChart() {
   const { data: availableData = [] } = useGetDimensoesQuery();
-  const [rawData, setRawData] = useState<ResultadoDimensao[]>([]);
 
-  useEffect(() => {
-    if (availableData && Array.isArray(availableData)) {
-      setRawData(availableData as ResultadoDimensao[]);
-    }
-  }, [availableData]);
-
-  const filteredData = rawData.filter(
-    (d): d is ResultadoDimensao =>
-      !!d && typeof d.valorFinal === "number" && !!d.dimensao
-  );
+  const filteredData = (availableData as ResultadoDimensao[]).filter(
+  (d): d is ResultadoDimensao =>
+    !!d &&
+    typeof d.valorFinal === "number" &&
+    !!d.dimensao &&
+    typeof d.media === "number"
+);
 
   const xScale = scaleBand<string>({
     domain: filteredData.map((d) => d.dimensao),
@@ -48,22 +40,30 @@ export default function BarChart() {
     padding: 0.3,
   });
 
-  const minY = 0;
-  const maxY = Math.max(...filteredData.map((d) => d.valorFinal), 5);
+  const xSubScale = scaleBand<string>({
+    domain: ["usuario", "media"],
+    range: [0, xScale.bandwidth()],
+    padding: 0.1,
+  });
+
+  const maxY = Math.max(
+    ...filteredData.map((d) =>
+      Math.max(d.valorFinal, d.media ?? 0)
+    )
+  );
 
   const yScale = scaleLinear({
-    domain: [minY, maxY + 20],
+    domain: [0, maxY + 20],
     nice: true,
     range: [height - margin.bottom, margin.top],
   });
 
-  const {
-    showTooltip,
-    hideTooltip,
-    tooltipData,
-    tooltipLeft,
-    tooltipTop,
-  } = useTooltip<ResultadoDimensao>();
+  const { showTooltip, hideTooltip, tooltipData, tooltipLeft, tooltipTop } =
+    useTooltip<{
+      dimensao: string;
+      tipo: string;
+      valor: number;
+    }>();
 
   return (
     <div className="relative">
@@ -83,29 +83,19 @@ export default function BarChart() {
         <AxisBottom
           top={height - margin.bottom}
           scale={xScale}
-          label="DIMENSÕES"
-          labelProps={{
-            fontSize: 15,
-            fontWeight: "bold",
-            fill: "#058AFF",
-            dy: "2em",
-            textAnchor: "middle",
-          }}
           tickLabelProps={() => ({
-            fontSize: 12,
+            fill: "#00247c",
+            fontSize: 13,
+            fontWeight: "bold",
+            textAnchor: "middle",
+            angle: -45,
+            dy: "3.5em",
+            dx: "-1.5em",
           })}
         />
         <AxisLeft
           left={margin.left}
           scale={yScale}
-          label="VALOR FINAL"
-          labelProps={{
-            fontSize: 15,
-            fontWeight: "bold",
-            fill: "#058AFF",
-            dx: "-2.5em",
-            textAnchor: "middle",
-          }}
           tickLabelProps={() => ({
             fill: "#00247c",
             fontSize: 13,
@@ -118,35 +108,54 @@ export default function BarChart() {
 
         <Group>
           {filteredData.map((d, i) => {
-            const barX = xScale(d.dimensao) ?? 0;
-            const barWidth = xScale.bandwidth();
+            const groupX = xScale(d.dimensao) ?? 0;
 
-            const y0 = yScale(0); // base da barra (eixo X real)
-            const y1 = yScale(d.valorFinal); // topo da barra
-            const barHeight = y0 - y1; // cresce para cima
-            const barY = y1; 
+            const bars = [
+              {
+                tipo: "usuario",
+                valor: d.valorFinal,
+                cor: "#058AFF",
+              },
+              {
+                tipo: "media",
+                valor: d.media!,
+                cor: "rgb(196, 0, 0)",
+              },
+            ];
 
             return (
-              <motion.rect
-                key={i}
-                x={barX}
-                y={barY}
-                width={barWidth}
-                height={barHeight}
-                fill="#058AFF"
-                // initial={{ height: 0, y: y0}}
-                // animate={{ height: barHeight, y: barY }}
-                // transition={{ duration: 0.6, ease: "easeOut", delay: i * 0.05 }}
-                onMouseMove={(e) => {
-                  const coords = localPoint(e);
-                  showTooltip({
-                    tooltipData: d,
-                    tooltipLeft: coords?.x,
-                    tooltipTop: coords?.y,
-                  });
-                }}
-                onMouseLeave={hideTooltip}
-              />
+              <Group key={i} left={groupX}>
+                {bars.map((bar, j) => {
+                  const barX = xSubScale(bar.tipo) ?? 0;
+                  const barY = yScale(bar.valor);
+                  const barHeight = yScale(0) - barY;
+                  const barWidth = xSubScale.bandwidth();
+
+                  return (
+                    <rect
+                      key={j}
+                      x={barX}
+                      y={barY}
+                      width={barWidth}
+                      height={barHeight}
+                      fill={bar.cor}
+                      onMouseMove={(e) => {
+                        const coords = localPoint(e);
+                        showTooltip({
+                          tooltipData: {
+                            dimensao: d.dimensao,
+                            tipo: bar.tipo,
+                            valor: bar.valor,
+                          },
+                          tooltipLeft: coords?.x,
+                          tooltipTop: coords?.y,
+                        });
+                      }}
+                      onMouseLeave={hideTooltip}
+                    />
+                  );
+                })}
+              </Group>
             );
           })}
         </Group>
@@ -155,10 +164,11 @@ export default function BarChart() {
       {tooltipData && (
         <Tooltip top={tooltipTop} left={tooltipLeft} style={tooltipStyles}>
           <div>
-            <strong>Dimensão:</strong> {tooltipData.dimensao}
+            <strong>{tooltipData.dimensao}</strong>
           </div>
           <div>
-            <strong>Valor:</strong> {tooltipData.valorFinal}
+            {tooltipData.tipo === "usuario" ? "Seu valor" : "Média"}:{" "}
+            {tooltipData.valor.toFixed(2)}
           </div>
         </Tooltip>
       )}

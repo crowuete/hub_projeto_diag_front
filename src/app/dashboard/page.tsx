@@ -49,17 +49,17 @@ export default function Dashboard(){
     <div className='flex flex-col w-full space-y-8 md:space-y-12 p-12'>
       
       <div className='p-4 m-10 text-center'>
-         <h1 className="text-4xl font-bold text-royal-blue border-b-2 border-royal-blue pb-2 mb-10">
-          Gráfico de Comparação Empresarial
-        </h1>
-        <div className="flex justify-center">
-          <BarChart />
-        </div>
-        <h1 className="text-4xl font-bold text-royal-blue border-b-2 border-royal-blue pb-2 m-20">
+        <h1 className="text-4xl font-bold text-royal-blue border-b-2 border-royal-blue pb-2">
           Gráfico de Evolução
         </h1>
         <div className="flex justify-center">
           <TrendChart />
+        </div>
+         <h1 className="text-4xl font-bold text-royal-blue border-b-2 border-royal-blue pb-2 mt-20">
+          Gráfico de Comparação Empresarial
+        </h1>
+        <div className="flex justify-center">
+          <BarChart />
         </div>
       </div>
       <div className='border-2 border-blue-darknut p-4 m-10 rounded-md bg-gray-50 shadow-sm'>

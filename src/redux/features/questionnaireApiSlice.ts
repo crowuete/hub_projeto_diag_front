@@ -45,6 +45,7 @@ export interface ResultadoDimensao {
   dimensao: string;
   valorFinal: number;
   data: string;
+  media: number;
 }
 
 
