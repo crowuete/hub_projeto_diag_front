@@ -13,8 +13,8 @@ import {motion} from "framer-motion";
 import type {RelatorioDate} from '@/redux/features/questionnaireApiSlice'
 import {useGetRelatorioDatesQuery} from '@/redux/features/questionnaireApiSlice';
 
-const width = 800;
-const height = 400;
+const width = 1000;
+const height = 600;
 const margin = { top: 20, right: 40, bottom: 70, left: 150 };
 
 const tooltipStyles = {
@@ -67,10 +67,6 @@ export default function TrendChart() {
         year: "numeric",
       })
     ) ?? 0;
-
-  const lastPoint = filteredData.length > 0 ? filteredData[filteredData.length - 1] : null;
-  const lastX = lastPoint ? x(lastPoint) : 0;
-  const lastY = lastPoint ? y(lastPoint) : 0;
 
   const {
     showTooltip,
@@ -179,20 +175,6 @@ export default function TrendChart() {
               onMouseLeave={hideTooltip}
             />
           ))}
-          {/* Seta na ponta final */}
-          <motion.polygon
-            initial={{ scale: 0 }}
-            animate={{ scale: 1 }}
-            transition={{ duration: 0.6, ease: "easeOut", delay: 0.30 }}
-            points={`
-              ${lastX + 10},${lastY}
-              ${lastX + 2},${lastY - 6}
-              ${lastX + 2},${lastY + 6}
-            `}
-            fill="#00247c"
-            transform={`translate(${lastX}px, ${lastY}px)`}
-            style={{ transformOrigin: "left center" }}
-          />
         </Group>
       </svg>
 
