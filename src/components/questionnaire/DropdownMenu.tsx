@@ -1,14 +1,17 @@
+'use client';
+
 import { useState, useRef, useEffect } from "react";
+import { useRouter } from "next/navigation";
 
 interface DropdownMenuProps {
   item: { id: number | string };
   handleDownload: (id: string) => void;
-  handleVisualizar?: () => void;
 }
 
-export default function DropdownMenu({ item, handleDownload, handleVisualizar }: DropdownMenuProps) {
+export default function DropdownMenu({ item, handleDownload }: DropdownMenuProps) {
   const [open, setOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
+  const router = useRouter();
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -46,8 +49,7 @@ export default function DropdownMenu({ item, handleDownload, handleVisualizar }:
           </button>
           <button
             onClick={() => {
-              if (handleVisualizar) handleVisualizar();
-              setOpen(false);
+              router.push(`/dashboard/${item.id}`);
             }}
             className="block w-full text-center px-4 py-2 text-gray-700 hover:bg-gray-100"
           >

@@ -3,7 +3,7 @@ import { useState } from 'react'
 import {useLazySearchReportQuery, useDownloadReportMutation, useGetRelatorioDatesQuery} from '@/redux/features/questionnaireApiSlice';
 import type { Report } from '@/redux/features/questionnaireApiSlice'
 import DropdownMenu from "@/components/questionnaire/DropdownMenu"; 
-import TrendChart from "@/components/graphic/TrendChard"; 
+// import TrendChart from "@/components/graphic/TrendChard"; 
 import BarChart from "@/components/graphic/BarChart"; 
 
 export default function Dashboard(){
@@ -49,13 +49,13 @@ export default function Dashboard(){
     <div className='flex flex-col w-full space-y-8 md:space-y-12 p-12'>
       
       <div className='p-4 m-10 text-center'>
-        <h1 className="text-4xl font-bold text-royal-blue border-b-2 border-royal-blue pb-2">
+        {/* <h1 className="text-4xl font-bold text-royal-blue border-b-2 border-royal-blue pb-2">
           Gráfico de Evolução
         </h1>
         <div className="flex justify-center">
           <TrendChart />
-        </div>
-         <h1 className="text-4xl font-bold text-royal-blue border-b-2 border-royal-blue pb-2 mt-20">
+        </div> */}
+         <h1 className="text-4xl font-bold text-royal-blue border-b-2 border-royal-blue pb-2">
           Gráfico de Comparação Empresarial
         </h1>
         <div className="flex justify-center">

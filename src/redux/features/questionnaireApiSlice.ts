@@ -46,8 +46,30 @@ export interface ResultadoDimensao {
   valorFinal: number;
   data: string;
   media: number;
+  resposta_modulo: {
+    id: number;
+    valorFinal: number;
+  };
 }
 
+export interface ModuloRelatorio {
+  modulo: {
+    nome: string;
+    descricao: string;
+  };
+  usuario: {
+    username: string;
+    email: string;
+  };
+  valorFinal: number;
+  dataResposta: string;
+  dimensoes: {
+    dimensao: {
+      titulo: string;
+    };
+    valorFinal: number;
+  }[];
+}
 
 export const questionnaireApiSlice = apiSlice.injectEndpoints({
     endpoints: (builder) => ({
@@ -84,6 +106,9 @@ export const questionnaireApiSlice = apiSlice.injectEndpoints({
         getDimensoes: builder.query<ResultadoDimensao[], void>({
             query: () => '/relatorios/dimensoes/',
         }),
+        getViewRespostaModulo: builder.query<ModuloRelatorio, number>({
+            query: (moduloId: number) => `/relatorio/modulo/?modulo_id=${moduloId}`
+        }),
 
     }),
 });
@@ -97,5 +122,6 @@ export const {
     useLazySearchReportQuery, 
     useCheckDeadlineQuery,
     useGetRelatorioDatesQuery,
-    useGetDimensoesQuery
+    useGetDimensoesQuery,
+    useGetViewRespostaModuloQuery
 } = questionnaireApiSlice;
