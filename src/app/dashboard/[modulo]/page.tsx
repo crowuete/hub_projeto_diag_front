@@ -2,6 +2,7 @@
 
 import { useParams } from 'next/navigation';
 import { useGetViewRespostaModuloQuery } from '@/redux/features/questionnaireApiSlice';
+import RadarChart from "@/components/graphic/RadarChart"; 
 
 export default function ViewModulo() {
   const params = useParams();
@@ -38,6 +39,11 @@ export default function ViewModulo() {
           </li>
         ))}
       </ul>
+
+      <h1 className="text-2xl font-bold mt-10 text-center text-royal-blue">Gráfico Empresarial</h1>
+      <div className="my-10 flex justify-center">
+        <RadarChart data={data} />
+      </div>
     </main>
   );
 }
