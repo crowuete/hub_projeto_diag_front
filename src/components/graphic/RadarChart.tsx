@@ -6,9 +6,9 @@ import { localPoint } from "@visx/event";
 import { Tooltip, useTooltip, defaultStyles } from "@visx/tooltip";
 import type { ModuloRelatorio } from "@/redux/features/questionnaireApiSlice";
 
-const size = 500;
+const size = 700;
 const center = size / 2;
-const radius = center - 60;
+const radius = center - 110;
 const levels = 5;
 
 const tooltipStyles = {
@@ -25,11 +25,15 @@ type RadarChartProps = {
   data: ModuloRelatorio;
 };
 
-export default function RadarChart({ data }: RadarChartProps) {
-   const labels = data.dimensoes.map((d) => d.dimensao.titulo);
-  const values = data.dimensoes.map((d) => d.valorFinal);
 
-  const maxValue = Math.max(...values);
+export default function RadarChart({ data }: RadarChartProps) {
+  const labels = data.dimensoes.map((d) => d.dimensao.titulo);
+  const userValues = data.dimensoes.map((d) => d.valorFinal);
+  const mediaValues = data.dimensoes.map(
+    d => data.media_dimensoes[d.dimensao.id.toString()] ?? 0
+  );
+
+  const maxValue = Math.max(...userValues.concat(mediaValues));
   const rScale = scaleLinear({
     domain: [0, maxValue],
     range: [0, radius],
@@ -46,8 +50,11 @@ export default function RadarChart({ data }: RadarChartProps) {
     };
   };
 
-  const points = values.map((v, i) => getPoint(i, v));
-  const polygonPoints = points.map((p) => `${p.x},${p.y}`).join(" ");
+  const userPoints = userValues.map((v, i) => getPoint(i, v));
+  const mediaPoints = mediaValues.map((v, i) => getPoint(i, v));
+
+  const userPolygon = userPoints.map((p) => `${p.x},${p.y}`).join(" ");
+  const mediaPolygon = mediaPoints.map((p) => `${p.x},${p.y}`).join(" ");
 
   const {
     tooltipData,
@@ -58,6 +65,7 @@ export default function RadarChart({ data }: RadarChartProps) {
   } = useTooltip<{
     label: string;
     value: number;
+    tipo: "usuario" | "media";
   }>();
 
   return (
@@ -66,36 +74,33 @@ export default function RadarChart({ data }: RadarChartProps) {
         <Group>
           {/* Grade circular */}
           {Array.from({ length: levels }).map((_, levelIdx) => {
-            const levelRadius = ((levelIdx + 1) / levels) * radius;
+            const r = ((levelIdx + 1) / levels) * radius;
+            const isLast = levelIdx === levels - 1;
+
             return (
               <circle
                 key={levelIdx}
                 cx={center}
                 cy={center}
-                r={levelRadius}
-                stroke="#e5e7eb"
+                r={r}
+                stroke="rgb(67, 145, 41)"
+                strokeWidth={isLast ? 2.5 : 0.4}
                 fill="none"
               />
             );
           })}
 
-          {/* Linhas dos eixos e rótulos */}
+          {/* Linhas e rótulos */}
           {labels.map((label, i) => {
             const outer = getPoint(i, maxValue);
             return (
               <g key={i}>
-                <line
-                  x1={center}
-                  y1={center}
-                  x2={outer.x}
-                  y2={outer.y}
-                  stroke="#d1d5db"
-                />
+                <line x1={center} y1={center} x2={outer.x} y2={outer.y} stroke="#d1d5db" />
                 <text
                   x={outer.x}
                   y={outer.y}
-                  dy={outer.y < center ? "-0.5em" : "1em"}
-                  dx={outer.x < center ? "-0.5em" : "0.5em"}
+                  dy={outer.y < center ? "-2em" : "3em"}
+                  dx={outer.x < center ? "-2em" : "3em"}
                   fontSize={13}
                   fontWeight="bold"
                   fill="#00247c"
@@ -107,18 +112,26 @@ export default function RadarChart({ data }: RadarChartProps) {
             );
           })}
 
-          {/* Polígono dos dados */}
+          {/* Polígono da média */}
           <polygon
-            points={polygonPoints}
-            fill="#058AFF55"
+            points={mediaPolygon}
+            fill="rgba(196, 0, 0, 0.3)"
+            stroke="rgb(196, 0, 0)"
+            strokeWidth={2}
+          />
+
+          {/* Polígono do usuário */}
+          <polygon
+            points={userPolygon}
+            fill="rgba(5, 138, 255, 0.4)"
             stroke="#058AFF"
             strokeWidth={2}
           />
 
           {/* Pontos interativos */}
-          {points.map((p, i) => (
+          {userPoints.map((p, i) => (
             <circle
-              key={i}
+              key={`user-${i}`}
               cx={p.x}
               cy={p.y}
               r={6}
@@ -130,7 +143,33 @@ export default function RadarChart({ data }: RadarChartProps) {
                 showTooltip({
                   tooltipData: {
                     label: labels[i],
-                    value: values[i],
+                    value: userValues[i],
+                    tipo: "usuario",
+                  },
+                  tooltipLeft: coords?.x,
+                  tooltipTop: coords?.y,
+                });
+              }}
+              onMouseLeave={hideTooltip}
+            />
+          ))}
+
+          {mediaPoints.map((p, i) => (
+            <circle
+              key={`media-${i}`}
+              cx={p.x}
+              cy={p.y}
+              r={6}
+              fill="rgb(196, 0, 0)"
+              stroke="#fff"
+              strokeWidth={2}
+              onMouseMove={(e) => {
+                const coords = localPoint(e);
+                showTooltip({
+                  tooltipData: {
+                    label: labels[i],
+                    value: mediaValues[i],
+                    tipo: "media",
                   },
                   tooltipLeft: coords?.x,
                   tooltipTop: coords?.y,
@@ -143,12 +182,20 @@ export default function RadarChart({ data }: RadarChartProps) {
       </svg>
 
       {tooltipData && (
-        <Tooltip top={tooltipTop} left={tooltipLeft} style={tooltipStyles}>
+        <Tooltip
+          top={tooltipTop}
+          left={tooltipLeft}
+          style={{
+            ...tooltipStyles,
+            backgroundColor: tooltipData.tipo === "usuario" ? "#058AFF" : "rgb(196, 0, 0)", // azul ou vermelho
+          }}
+        >
           <div>
             <strong>{tooltipData.label}</strong>
           </div>
           <div>
-            Valor: {tooltipData.value.toFixed(2)}
+            {tooltipData.tipo === "usuario" ? "Seu valor" : "Média"}:{" "}
+            {tooltipData.value.toFixed(2)}
           </div>
         </Tooltip>
       )}

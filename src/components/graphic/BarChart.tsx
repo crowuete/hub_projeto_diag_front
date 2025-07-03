@@ -16,7 +16,7 @@ const margin = { top: 30, right: 60, bottom: 120, left: 40 };
 const tooltipStyles = {
   ...defaultStyles,
   backgroundColor: "#058AFF",
-  border: "2px solid #F2F2F2",
+  border: "6px solid #F2F2F2",
   borderRadius: 6,
   color: "white",
   padding: "10px",
@@ -72,7 +72,7 @@ export default function BarChart() {
           scale={yScale}
           width={width - margin.left - margin.right}
           left={margin.left}
-          stroke="#e5e7eb"
+          stroke="rgb(222, 224, 226)"
         />
         <GridColumns
           scale={xScale}
@@ -162,7 +162,14 @@ export default function BarChart() {
       </svg>
 
       {tooltipData && (
-        <Tooltip top={tooltipTop} left={tooltipLeft} style={tooltipStyles}>
+        <Tooltip
+          top={tooltipTop}
+          left={tooltipLeft}
+          style={{
+            ...tooltipStyles,
+            backgroundColor: tooltipData.tipo === "usuario" ? "#058AFF" : "rgb(196, 0, 0)", // azul ou vermelho
+          }}
+        >
           <div>
             <strong>{tooltipData.dimensao}</strong>
           </div>

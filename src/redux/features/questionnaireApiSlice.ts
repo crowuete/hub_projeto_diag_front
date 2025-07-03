@@ -65,10 +65,12 @@ export interface ModuloRelatorio {
   dataResposta: string;
   dimensoes: {
     dimensao: {
-      titulo: string;
+        id: number;
+        titulo: string;
     };
     valorFinal: number;
   }[];
+  media_dimensoes: Record<string, number>;
 }
 
 export const questionnaireApiSlice = apiSlice.injectEndpoints({
