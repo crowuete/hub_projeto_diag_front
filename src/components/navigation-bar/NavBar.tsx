@@ -42,6 +42,7 @@ export default function Navbar() {
         { name: 'Sobre', href: '/about' },
         { name: 'Questionário', href: '/questionnaire' },
         { name: 'Contato', href: '/contact' },
+        { name: 'Dashboard', href: '/dashboard' },
     ];
 
     const navLinks = (isMobile: boolean, close?: () => void) => (

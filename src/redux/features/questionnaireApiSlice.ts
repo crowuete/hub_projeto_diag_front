@@ -28,6 +28,49 @@ interface RespostaModulo {
     valor: number;
 }
 
+export interface Report {
+    id: number;
+    usuario: string;
+    nome_modulo: string;
+    valorFinal: number;
+    dataResposta: number;
+}
+
+export interface RelatorioDate {
+  data: string;
+  valorFinal: number;
+}
+
+export interface ResultadoDimensao {
+  dimensao: string;
+  valorFinal: number;
+  data: string;
+  media: number;
+  resposta_modulo: {
+    id: number;
+    valorFinal: number;
+  };
+}
+
+export interface ModuloRelatorio {
+  modulo: {
+    nome: string;
+    descricao: string;
+  };
+  usuario: {
+    username: string;
+    email: string;
+  };
+  valorFinal: number;
+  dataResposta: string;
+  dimensoes: {
+    dimensao: {
+      titulo: string;
+    };
+    valorFinal: number;
+  }[];
+}
+
 export const questionnaireApiSlice = apiSlice.injectEndpoints({
     endpoints: (builder) => ({
         getQuestionnaires: builder.query<Dimensao[], void>({
@@ -50,6 +93,23 @@ export const questionnaireApiSlice = apiSlice.injectEndpoints({
                 responseHandler: (response) => response.blob(),
             }),
         }),
+        searchReport: builder.query<Report[], string>({
+            query: (data) => `/relatorios/?data=${data}`,
+            transformResponse: (response: { resultados: Report[] }) => response.resultados,
+        }),
+        checkDeadline: builder.query<{ ok_response: boolean; message: string }, string | void>({
+            query: (idModulo) => `/questionario/${idModulo}/check_deadline/`,
+        }),
+        getRelatorioDates: builder.query<RelatorioDate[], void>({
+            query: () => '/relatorios/datas/',
+        }),
+        getDimensoes: builder.query<ResultadoDimensao[], void>({
+            query: () => '/relatorios/dimensoes/',
+        }),
+        getViewRespostaModulo: builder.query<ModuloRelatorio, number>({
+            query: (moduloId: number) => `/relatorio/modulo/?modulo_id=${moduloId}`
+        }),
+
     }),
 });
 
@@ -58,4 +118,10 @@ export const {
     useGetQuestionnaireByModuleQuery,
     useSaveModuleResponsesMutation,
     useDownloadReportMutation,
+    useSearchReportQuery,
+    useLazySearchReportQuery, 
+    useCheckDeadlineQuery,
+    useGetRelatorioDatesQuery,
+    useGetDimensoesQuery,
+    useGetViewRespostaModuloQuery
 } = questionnaireApiSlice;

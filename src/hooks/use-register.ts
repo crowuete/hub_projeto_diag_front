@@ -34,7 +34,7 @@ export default function useRegister() {
             })
             .catch((error) => {
                 console.error('Registration error:', error);
-                toast.error('Failha ao registrar conta');
+                toast.error('Falha ao registrar conta');
             });
     };
 

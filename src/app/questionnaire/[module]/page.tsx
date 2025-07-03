@@ -1,6 +1,23 @@
-import Link from 'next/link';
+'use client'
 
-export default function Questionnaire() {
+import Link from 'next/link';
+import React from 'react';
+import { useCheckDeadlineQuery } from '@/redux/features/questionnaireApiSlice'; 
+import { useAsyncValue } from '@/hooks/index'; 
+
+
+type Props = {
+  params: { module: string } | Promise<{ module: string }>;
+}
+
+
+export default function Questionnaire({ params }: Props) {
+    const resolvedParams = useAsyncValue(params);
+
+    const { data, isLoading, error } = useCheckDeadlineQuery(resolvedParams?.module, {
+        skip: !resolvedParams?.module,
+    });
+
     return (
         <>
             <div className='min-h-screen'>
@@ -26,28 +43,31 @@ export default function Questionnaire() {
                             </p>
                         </div>
 
-                        <div className='flex w-max h-max space-x-2 mx-auto items-center md:px-4 md:py-2 bg-gunmetal rounded-md border border-vivid-cerulean'                       >
-                            <a className='text-bleached-silk'>
-                                Número de Questões
-                            </a>
-                            <div className='w-[1px] h-12 bg-zinc-500'></div>
-                            <a className='text-bleached-silk'>
-                                Tempo Estimado
-                            </a>
-                            <div className='hidden md:block w-[1px] h-12 bg-zinc-500'></div>
-                            <Link
-                                href='/questionnaire/x/Diagnóstico Organizacional'
-                                className='hidden md:block w-fit md:px-4 md:py-2 bg-blue-500 text-white font-semibold rounded-md hover:bg-blue-600'>
-                                Iniciar Questionário
-                            </Link>
-                        </div>
+                        {isLoading ? (
+                                <span className="text-bleached-silk">Verificando disponibilidade...</span>
+                            ) : error ? (
+                                <span className="text-red-500">Erro ao verificar o prazo.</span>
+                            ) : data?.ok_response ? (
+                                <div className='flex w-max h-max space-x-2 mx-auto items-center md:px-4 md:py-2 bg-gunmetal rounded-md border border-vivid-cerulean'>
+                                    <a className='text-bleached-silk'>
+                                        Número de Questões
+                                    </a>
+                                    <div className='w-[1px] h-12 bg-zinc-500'></div>
+                                    <a className='text-bleached-silk'>
+                                        Tempo Estimado
+                                    </a>
+                                    <div className='hidden md:block w-[1px] h-12 bg-zinc-500'></div>
+                                    <Link
+                                        href='/questionnaire/x/Diagnóstico Organizacional'
+                                        className='hidden md:block w-fit md:px-4 md:py-2 bg-blue-500 text-white font-semibold rounded-md hover:bg-blue-600'>
+                                        Iniciar Questionário
+                                    </Link>
+                                </div>
+                            ) : (
+                                <span className="text-blue-darknut font-semibold">{data?.message}</span>
+                            )
+                        }
 
-
-                        <Link
-                            href='/questionnaire/x/Diagnóstico Organizacional'
-                            className='md:hidden mx-auto w-fit px-4 py-2 bg-blue-500 text-white font-semibold rounded-md hover:bg-blue-600'>
-                            Iniciar Questionário
-                        </Link>
                     </div>
                 </div>
                 <div className='p-12 max-w-4xl mx-auto'>
