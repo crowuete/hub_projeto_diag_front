@@ -46,59 +46,78 @@ export default function Dashboard(){
   };
 
   return (
-    <div className='flex flex-col w-full space-y-8 md:space-y-12 p-12'>
+    <div className='flex flex-col w-full space-y-8 md:space-y-12 pb-40 bg-bleached-silk  dark:bg-gunmetal'>
       
-      <div className='p-4 m-10 text-center'>
-        {/* <h1 className="text-4xl font-bold text-royal-blue border-b-2 border-royal-blue pb-2">
-          Gráfico de Evolução
-        </h1>
-        <div className="flex justify-center">
-          <TrendChart />
-        </div> */}
-         <h1 className="text-4xl font-bold text-royal-blue border-b-2 border-royal-blue pb-2">
+      <div className='p-10 text-center'>
+        <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-royal-blue border-b-2 border-teal-primary pb-2 text-center dark:text-blue-darknut">
           Gráfico de Comparação Empresarial
         </h1>
         <div className="flex justify-center">
           <BarChart />
         </div>
       </div>
-      <div className='border-2 border-blue-darknut p-4 m-10 rounded-md bg-gray-50 shadow-sm'>
-        <h2 className="text-xl font-semibold mb-4">Gerar Relatório</h2>
-        <div className="flex space-x-2 mb-4">
+      <div className="border p-4 sm:p-6 md:p-8 lg:p-10 m-4 sm:m-6 md:m-8 lg:m-10 rounded-md bg-gray-50 shadow-sm dark:bg-gunmetal dark:border-gray-light">
+        <h2 className="text-lg sm:text-xl md:text-2xl font-semibold mb-4 text-center sm:text-left">
+          Gerar Relatório
+        </h2>
+
+        <div className="flex flex-col sm:flex-row sm:items-center sm:space-x-2 space-y-2 sm:space-y-0 mb-2">
           <select
             value={dateSelection}
             onChange={(e) => setDateSelection(e.target.value)}
-            className="flex-grow px-4 py-2 border rounded-md focus:outline-none focus:ring focus:royal-blue"
+            className="w-full sm:flex-grow px-4 py-3 border rounded-md focus:outline-none focus:ring focus:ring-teal-primary dark:bg-gray-light dark:text-black-wash"
           >
             <option value="">Selecione uma data</option>
             {availableDates.map((date) => (
               <option key={date} value={date}>
-                {new Date(date).toLocaleDateString("pt-BR")}
+                {new Date(date + 'T00:00:00').toLocaleDateString('pt-BR')}
               </option>
             ))}
           </select>
-           <button onClick={handleSearch} className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600" > Buscar Relatório  </button>
+
+          <button
+            onClick={handleSearch}
+            className="w-full sm:w-auto px-4 py-2 bg-royal-blue text-white rounded-md hover:bg-teal-secundary-opc"
+          >
+            Buscar 
+          </button>
         </div>
 
         {errorReport && <p className="text-red-500">Erro ao buscar relatórios.</p>}
 
         {report && report.length > 0 && (
-          <div className="p-4">
-            <div className="grid grid-cols-5 font-semibold mb-2 text-start">
-              <div>Usuário</div>
-              <div>Módulo</div>
-              <div>Valor Final</div>
-              <div>Data Resposta</div>
-            </div>
-
+          <div className="p-2 sm:p-4">
             {report.map((item, index) => (
-              <div key={index} className="grid grid-cols-5 border-t py-2 text-start">
-                <div>{item.usuario}</div>
-                <div>{item.nome_modulo}</div>
-                <div>{item.valorFinal}</div>
-                <div>{item.dataResposta}</div>
-                <div className='flex space-x gap-2 justify-end'>
-                  <DropdownMenu item={item} handleDownload={handleDownload}/>
+              <div
+                key={index}
+                className="grid sm:grid-cols-5 border-t py-4 gap-2 sm:gap-4 items-start"
+              >
+                <div>
+                  <div className=" sm:block text-x font-bold text-blue-darknut mb-1">
+                    Usuário
+                  </div>
+                  <div className="text-base">{item.usuario}</div>
+                </div>
+                <div>
+                  <div className=" sm:block text-x font-bold text-blue-darknut mb-1">
+                    Módulo
+                  </div>
+                  <div className="text-base">{item.nome_modulo}</div>
+                </div>
+                <div>
+                  <div className=" sm:block text-x font-bold text-blue-darknut mb-1">
+                    Valor Final
+                  </div>
+                  <div className="text-base">{item.valorFinal}</div>
+                </div>
+                <div>
+                  <div className=" sm:block text-x font-bold text-blue-darknut mb-1">
+                    Data Resposta
+                  </div>
+                  <div className="text-base">{new Date(item.dataResposta + 'T00:00:00').toLocaleDateString('pt-BR')}</div>
+                </div>
+                <div className="flex justify-end items-center">
+                  <DropdownMenu item={item} handleDownload={handleDownload} />
                 </div>
               </div>
             ))}

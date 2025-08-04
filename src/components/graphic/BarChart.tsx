@@ -1,38 +1,57 @@
 "use client";
 
+import { useEffect, useRef, useState } from "react";
 import { scaleLinear, scaleBand } from "@visx/scale";
 import { Group } from "@visx/group";
 import { AxisLeft, AxisBottom } from "@visx/axis";
-import { GridRows, GridColumns } from "@visx/grid";
 import { Tooltip, useTooltip, defaultStyles } from "@visx/tooltip";
 import { localPoint } from "@visx/event";
-import type { ResultadoDimensao } from "@/redux/features/questionnaireApiSlice";
-import { useGetDimensoesQuery } from "@/redux/features/questionnaireApiSlice";
+import { ResultadoDimensao, useGetDimensoesQuery } from "@/redux/features/questionnaireApiSlice";
 
-const width = 1000;
-const height = 600;
-const margin = { top: 30, right: 60, bottom: 120, left: 40 };
+const prefersDark = typeof window !== "undefined" && window.matchMedia('(prefers-color-scheme: dark)').matches;
+
+const margin = { top: 30, right: 40, bottom: 120, left: 40 };
 
 const tooltipStyles = {
   ...defaultStyles,
-  backgroundColor: "#058AFF",
-  border: "6px solid #F2F2F2",
+  border: "2px solid #F2F2F2",
   borderRadius: 6,
   color: "white",
-  padding: "10px",
   boxShadow: "0 4px 8px rgba(0, 0, 0, 0.15)",
 };
 
 export default function BarChart() {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [dimensions, setDimensions] = useState({ width: 600, height: 400 });
+
   const { data: availableData = [] } = useGetDimensoesQuery();
 
   const filteredData = (availableData as ResultadoDimensao[]).filter(
-  (d): d is ResultadoDimensao =>
-    !!d &&
-    typeof d.valorFinal === "number" &&
-    !!d.dimensao &&
-    typeof d.media === "number"
-);
+    (d): d is ResultadoDimensao =>
+      !!d && typeof d.valorFinal === "number" && !!d.dimensao && typeof d.media === "number"
+  );
+
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+
+    const observer = new ResizeObserver((entries) => {
+      for (const entry of entries) {
+        let width = entry.contentRect.width;
+        if (width < 350) {
+          width = 350;
+        }
+        const aspectRatio = width < 500 ? 1.1 : 0.6; // mais altura em telas pequenas
+        const height = width * aspectRatio;
+        setDimensions({ width, height });
+      }
+    });
+
+    observer.observe(el);
+    return () => el && observer.unobserve(el);
+  }, []);
+
+  const { width, height } = dimensions;
 
   const xScale = scaleBand<string>({
     domain: filteredData.map((d) => d.dimensao),
@@ -46,14 +65,10 @@ export default function BarChart() {
     padding: 0.1,
   });
 
-  const maxY = Math.max(
-    ...filteredData.map((d) =>
-      Math.max(d.valorFinal, d.media ?? 0)
-    )
-  );
+  const maxY = Math.max(...filteredData.map((d) => Math.max(d.valorFinal, d.media ?? 0)));
 
   const yScale = scaleLinear({
-    domain: [0, maxY + 20],
+    domain: [0, maxY + 10], // margem superior
     nice: true,
     range: [height - margin.bottom, margin.top],
   });
@@ -66,25 +81,13 @@ export default function BarChart() {
     }>();
 
   return (
-    <div className="relative">
+    <div className="w-full max-w-[1200px] mx-auto px-4" ref={containerRef}>
       <svg width={width} height={height}>
-        <GridRows
-          scale={yScale}
-          width={width - margin.left - margin.right}
-          left={margin.left}
-          stroke="rgb(222, 224, 226)"
-        />
-        <GridColumns
-          scale={xScale}
-          height={height - margin.top - margin.bottom}
-          top={margin.top}
-          stroke="#f3f4f6"
-        />
         <AxisBottom
           top={height - margin.bottom}
           scale={xScale}
           tickLabelProps={() => ({
-            fill: "#00247c",
+            fill: prefersDark ? "#05AFF2" : "#05AFF2",
             fontSize: 13,
             fontWeight: "bold",
             textAnchor: "middle",
@@ -97,7 +100,7 @@ export default function BarChart() {
           left={margin.left}
           scale={yScale}
           tickLabelProps={() => ({
-            fill: "#00247c",
+            fill: prefersDark ? "#05AFF2" : "#05AFF2",
             fontSize: 13,
             fontWeight: "bold",
             textAnchor: "end",
@@ -109,12 +112,11 @@ export default function BarChart() {
         <Group>
           {filteredData.map((d, i) => {
             const groupX = xScale(d.dimensao) ?? 0;
-
             const bars = [
               {
                 tipo: "usuario",
                 valor: d.valorFinal,
-                cor: "#058AFF",
+                cor: prefersDark ? "#058AFF" : "#058AFF",
               },
               {
                 tipo: "media",
@@ -167,7 +169,7 @@ export default function BarChart() {
           left={tooltipLeft}
           style={{
             ...tooltipStyles,
-            backgroundColor: tooltipData.tipo === "usuario" ? "#058AFF" : "rgb(196, 0, 0)", // azul ou vermelho
+            backgroundColor: tooltipData.tipo === "usuario" ? "#05AFF2" : "rgb(196, 0, 0)",
           }}
         >
           <div>
