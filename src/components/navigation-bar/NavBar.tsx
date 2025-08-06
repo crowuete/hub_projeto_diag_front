@@ -8,6 +8,7 @@ import { useAppSelector, useAppDispatch } from '@/redux/hooks';
 import { useLogoutMutation } from '@/redux/features/authApiSlice';
 import { logout as setLogout } from '@/redux/features/authSlice';
 import NavLink from './NavLink';
+import Image from 'next/image';
 
 export default function Navbar() {
     const pathname = usePathname() || '';
@@ -110,7 +111,31 @@ export default function Navbar() {
                                 {open ? <X size={24} /> : <Menu size={24} />}
                             </DisclosureButton>
                         </div>
-                        <div className='max-w-5xl mx-auto flex flex-1 p-3 sm:p-4 items-center justify-center md:justify-between'>
+                        <div className='max-w-7xl mx-auto flex flex-1 p-3 sm:p-4 items-center justify-center md:justify-between'>
+
+                            <div className='hidden md:block md:space-x-5 lg:space-x-12 bg'>
+                                <NavLink
+                                    href='/'
+                                    isBanner
+                                    onClick={() => {
+                                        close();
+                                    }}
+                                >
+                                    <Image
+                                        src="/home/logo-hub.png"
+                                        alt="Logo HUB"
+                                        width={250}
+                                        height={100}
+                                        className="rounded-lg"
+                                        style={{
+                                            objectFit: "cover",
+                                            objectPosition: "50% 40%",
+                                        }}
+                                    />
+                                </NavLink>
+                                
+                            </div>
+                
                             <div className='flex flex-shrink-0'>
                                 <NavLink
                                     href='/'
@@ -134,6 +159,25 @@ export default function Navbar() {
                         <div className='flex flex-col items-center space-y-4 py-4 md:hidden'>
                             {navLinks(true, close)}
                             {isAuthenticated ? authLinks(true, close) : guestLinks(true, close)}
+                            <NavLink
+                                href='/'
+                                isBanner
+                                onClick={() => {
+                                    close();
+                                }}
+                            >
+                                <Image
+                                    src="/home/logo-hub.png"
+                                    alt="Logo HUB"
+                                    width={250}
+                                    height={100}
+                                    className="rounded-lg"
+                                    style={{
+                                        objectFit: "cover",
+                                        objectPosition: "50% 40%",
+                                    }}
+                                />
+                            </NavLink>
                         </div>
                     </DisclosurePanel>
                 </>
