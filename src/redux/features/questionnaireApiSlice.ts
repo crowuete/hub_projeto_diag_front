@@ -6,25 +6,35 @@ interface Question {
     explicacao: string;
 }
 
-interface Dimensao {
+export interface Dimensao {
     id: number;
     dimensaoTitulo: string;
     descricao: string;
-    tipo: 'OBRIGATORIO' | 'COMERCIO' | 'SERVICO' | 'INDUSTRIA';
     perguntas: Question[];
 }
 
-interface Modulo {
+export interface Modulo {
     id: number;
     nome: string;
     descricao: string;
     perguntasQntd: number;
     tempo: number;
     dimensoes: Dimensao[];
+    respondidads: string[];
+    nextDimensionIndex: number;
+    respostasIncompletas: {
+        dimensao: string;
+        respostas: RespostaModulo[];
+    };
 }
 
-interface RespostaModulo {
-    perguntaId: number;
+export interface DimensaoIncompleta {
+  dimensao: string;
+  respostas: RespostaModulo[] | void;
+}
+
+export interface RespostaModulo {
+    id: number;
     valor: number;
 }
 
@@ -73,6 +83,15 @@ export interface ModuloRelatorio {
   media_dimensoes: Record<string, number>;
 }
 
+export interface SaveIncomplete {
+    nomeModulo: string;
+    dimensaoTitulo: string;
+    respostas: {
+        id: number; 
+        valor: number | null
+    }[];
+}
+
 export const questionnaireApiSlice = apiSlice.injectEndpoints({
     endpoints: (builder) => ({
         getQuestionnaires: builder.query<Dimensao[], void>({
@@ -111,6 +130,13 @@ export const questionnaireApiSlice = apiSlice.injectEndpoints({
         getViewRespostaModulo: builder.query<ModuloRelatorio, number>({
             query: (moduloId: number) => `/relatorio/modulo/?modulo_id=${moduloId}`
         }),
+        saveIncomplete: builder.mutation<void, SaveIncomplete> ({
+            query: (resposta) => ({
+                url: 'questionario/salvar-incompleta/',
+                method: 'POST',
+                body: resposta,
+            })
+        }),
 
     }),
 });
@@ -125,5 +151,6 @@ export const {
     useCheckDeadlineQuery,
     useGetRelatorioDatesQuery,
     useGetDimensoesQuery,
-    useGetViewRespostaModuloQuery
+    useGetViewRespostaModuloQuery,
+    useSaveIncompleteMutation
 } = questionnaireApiSlice;

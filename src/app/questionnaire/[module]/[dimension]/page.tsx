@@ -1,24 +1,80 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
 import { useSubmitResponses } from '@/hooks';
-import { useGetQuestionnaireByModuleQuery, useDownloadReportMutation } from '@/redux/features/questionnaireApiSlice';
+import useSaveResponsesIncomplete from '@/hooks/use-save-responses-incomplete';
+import { useGetQuestionnaireByModuleQuery, useDownloadReportMutation, Dimensao, DimensaoIncompleta, RespostaModulo, Modulo} from '@/redux/features/questionnaireApiSlice';
 import { QuestionWithLikert } from '@/components/questionnaire';
 import { Check, ChevronLeft, ChevronRight } from 'lucide-react';
 
+interface CompletedIndex {
+  value: number;
+  savedAt: Date;
+}
+
 export default function Page() {
     const { dimension: moduleName } = useParams();
-
-    const { data: moduleData, isLoading, isError } = useGetQuestionnaireByModuleQuery(moduleName as string, {
+    const { data: moduleData, isLoading, isError, refetch } = useGetQuestionnaireByModuleQuery(moduleName as string, {
         skip: !moduleName,
+        refetchOnMountOrArgChange: true
     });
-
     const [currentDimensionIndex, setCurrentDimensionIndex] = useState(0);
     const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
     const [showDescription, setShowDescription] = useState(true);
     const [showSubmit, setShowSubmit] = useState(false);
-    const { responses, handleResponseChange, handleSubmitResponses } = useSubmitResponses();
+    const { responses, setResponses, handleResponseChange, handleSubmitResponses } = useSubmitResponses();
+    const [completedIndices, setCompletedIndices] = useState<CompletedIndex[]>([]);
+    const { saveResponsesIncomplete } = useSaveResponsesIncomplete();
+
+     const newCompletedIndex: CompletedIndex = {
+        value: currentDimensionIndex,
+        savedAt: new Date(),
+    };
+
+    useEffect(() => {
+        if (moduleName) {
+            refetch(); 
+        }
+    }, [moduleName, refetch]);
+
+    useEffect(() => {
+
+        if (!moduleData) return;
+
+        console.log(moduleData)
+
+        const respondidas = moduleData.respondidads
+        const indicesRespondidas = (moduleData.dimensoes as Dimensao[]) 
+            .map((dim, idx) => respondidas.includes(dim.dimensaoTitulo) ? idx : null)
+            .filter((idx): idx is number => idx !== null);
+        
+        const newCompletedIndices = indicesRespondidas.map(index => ({
+            value: index,
+            savedAt: new Date(), 
+        }));
+
+        setCompletedIndices(newCompletedIndices);
+
+        const respostasIncompletas: DimensaoIncompleta = moduleData.respostasIncompletas || {};
+        const respostasAntigas: Record<number, number> = {};
+        Object.values(respostasIncompletas).forEach((dim: DimensaoIncompleta) => {
+            if (dim.respostas) {
+                dim.respostas.forEach((r: RespostaModulo) => {
+                    const id = r.id ?? r.id;
+                    respostasAntigas[id] = r.valor;
+                });
+            }
+        });
+        setResponses(respostasAntigas);
+
+        if (typeof (moduleData as Modulo).nextDimensionIndex === 'number') {
+            setCurrentDimensionIndex((moduleData as Modulo).nextDimensionIndex);
+            setCurrentQuestionIndex(0);
+            setShowDescription(true);
+        }
+
+    }, [moduleData, setResponses]);
 
     if (isLoading) return <div>Loading...</div>;
     if (isError) return <div>Error loading module data.</div>;
@@ -40,9 +96,23 @@ export default function Page() {
     const currentQuestion = currentDimension.questions[currentQuestionIndex];
 
     const isFirstQuestion = currentDimensionIndex === 0 && currentQuestionIndex === 0 && showDescription;
-    const isLastQuestion =
-        currentDimensionIndex === totalDimensions - 1 &&
-        currentQuestionIndex === totalQuestionsInDimension - 1;
+
+    const handleFinishDimension = async () => {
+        await saveResponsesIncomplete(
+            moduleName as string,
+            currentDimension,
+            responses
+        );
+
+        setCompletedIndices((prev) => {
+            const existingValues = new Set(prev.map(item => item.value));
+            if (existingValues.has(newCompletedIndex.value)) {
+                return prev;
+            }
+            return [...prev, newCompletedIndex];
+        });
+        setShowDescription(true);
+    };
 
     const goToNext = () => {
         if (showDescription && currentQuestionIndex < totalQuestionsInDimension) {
@@ -50,10 +120,18 @@ export default function Page() {
         } else if (currentQuestionIndex < totalQuestionsInDimension - 1) {
             setCurrentQuestionIndex((prev) => prev + 1);
         } else if (currentDimensionIndex < totalDimensions - 1) {
+            handleFinishDimension();
             setCurrentDimensionIndex((prev) => prev + 1);
             setCurrentQuestionIndex(0);
             setShowDescription(true);
         } else if (currentDimensionIndex === totalDimensions - 1) {
+            setCompletedIndices((prev) => {
+                const existingValues = new Set(prev.map(item => item.value));
+                if (existingValues.has(newCompletedIndex.value)) {
+                    return prev;
+                }
+                return [...prev, newCompletedIndex];
+            });
             setShowSubmit(true);
         }
     };
@@ -64,8 +142,10 @@ export default function Page() {
         } else if (currentQuestionIndex > 0) {
             setCurrentQuestionIndex((prev) => prev - 1);
         } else if (currentDimensionIndex > 0) {
-            setCurrentDimensionIndex(currentDimensionIndex - 1);
-            const previousDimension = dimensions[currentDimensionIndex - 1];
+            const newIndex = currentDimensionIndex - 1;
+            setCompletedIndices((prev) => prev.filter((item) => item.value !== newIndex));
+            setCurrentDimensionIndex(newIndex);
+            const previousDimension = dimensions[newIndex];
             if (previousDimension.questions.length > 0) {
                 setCurrentQuestionIndex(previousDimension.questions.length - 1);
                 setShowDescription(false);
@@ -132,7 +212,7 @@ export default function Page() {
 
         const handleSubmitAndDownload = async () => {
             try {
-                await handleSubmitResponses(moduleName as string);
+                await handleSubmitResponses(moduleName as string, (moduleData as Modulo).respostasIncompletas);
 
                 const blob = await downloadReport('Diagnóstico Organizacional').unwrap();
                 const url = window.URL.createObjectURL(blob);
@@ -156,7 +236,7 @@ export default function Page() {
                 <h1 className='text-2xl sm:text-3xl md:text-5xl font-extrabold mb-16'> Questionário Finalizado! </h1>
                 <button
                     className='px-6 py-3 bg-turquoise rounded-md text-black-wash'
-                    onClick={handleSubmitAndDownload} // Substituí o evento onClick
+                    onClick={handleSubmitAndDownload}
                 >
                     Enviar Respostas e Baixar Relatório
                 </button>
@@ -182,7 +262,7 @@ export default function Page() {
         };
 
         return (
-            <button
+           <button
                 className={`rounded-full border ${sizeClasses[size]} border-zinc-400 text-zinc-400 hover:border-blue-darknut hover:text-blue-darknut`}
                 onClick={onClick}
                 disabled={disabled}
@@ -193,10 +273,56 @@ export default function Page() {
     };
 
     return (
-        <div className='min-h-screen p-4 pt-32 sm:p-8 sm:pt-36 md:p-12 md:pt-40 bg-bleached-silk dark:bg-dark-navy-blue'>
-            <div className='flex flex-col p-4 max-w-4xl mx-auto bg-off-white dark:bg-gunmetal rounded-md border border-royal-blue dark:border-blue-darknut'>
-                {showSubmit ? <SubmitView /> : (showDescription ? <DescriptionView /> : <QuestionView />)}
+        <div className='flex flex-col min-h-screen p-4 pt-32 sm:p-8 sm:pt-36 md:flex-row md:p-12 md:pt-40 bg-bleached-silk dark:bg-dark-navy-blue gap-6'>
+
+            <div  className='flex flex-col items-center justify-center p-4 md:flex-1 mx-auto bg-off-white dark:bg-gunmetal rounded-md border border-royal-blue dark:border-blue-darknut'>
+                {showSubmit
+                ? <SubmitView />
+                : (showDescription
+                    ? <DescriptionView />
+                    : <QuestionView />
+                )
+                }
             </div>
+
+            <div className='flex flex-col justify-center bg-bleached-silk dark:bg-dark-navy-blue rounded-md border border-royal-blue dark:border-blue-darknut p-4 md:w-1/3'>
+                <h2 className='text-3xl text-center mb-10 font-bold text-royal-blue dark:text-blue-darknut'>Histórico de preenchimento</h2>
+                <div className="space-y-4">
+                {dimensions.map((dimension, index) => {
+                    const isCurrent = index === currentDimensionIndex;           
+                    const completedItem = completedIndices.find(item => item.value === index);
+                    const isCompleted = !!completedItem;
+
+                    return (
+                        <div key={index} className="flex items-center justify-between">
+                            <div className="flex-1">
+                                <p
+                                    className={`text-xl font-semibold pb-2 border-b-2 ${
+                                        isCurrent
+                                            ? 'text-royal-blue border-royal-blue dark:text-blue-darknut dark:border-blue-darknut'
+                                            : 'border-black-wash dark:border-white'
+                                    }`}
+                                >
+                                    {dimension.title}
+                                </p>
+                                {completedItem && (
+                                    <p className="text-sm text-gray-600 mt-1 dark:text-gray-400">
+                                        Respondido em: {completedItem.savedAt.toLocaleDateString()}
+                                    </p>
+                                )}
+                            </div>
+                            
+                            {isCompleted && (
+                                <span className="ml-4 w-6 h-6 flex items-center justify-center rounded-full bg-royal-blue text-white text-sm font-bold dark:bg-blue-darknut">
+                                    ✓
+                                </span>
+                            )}
+                        </div>
+                    );
+                })}
+                </div>
+            </div>
+  
         </div>
     );
 }

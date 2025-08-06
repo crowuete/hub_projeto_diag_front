@@ -72,7 +72,6 @@ export default function RadarChart({ data }: RadarChartProps) {
     <div className="relative">
       <svg width={size} height={size}>
         <Group>
-          {/* Grade circular */}
           {Array.from({ length: levels }).map((_, levelIdx) => {
             const r = ((levelIdx + 1) / levels) * radius;
             const isLast = levelIdx === levels - 1;
@@ -90,7 +89,6 @@ export default function RadarChart({ data }: RadarChartProps) {
             );
           })}
 
-          {/* Linhas e rótulos */}
           {labels.map((label, i) => {
             const outer = getPoint(i, maxValue);
             return (
@@ -103,7 +101,7 @@ export default function RadarChart({ data }: RadarChartProps) {
                   dx={outer.x < center ? "-2em" : "3em"}
                   fontSize={13}
                   fontWeight="bold"
-                  fill="#00247c"
+                  fill="#058AFF"
                   textAnchor="middle"
                 >
                   {label}
@@ -112,7 +110,6 @@ export default function RadarChart({ data }: RadarChartProps) {
             );
           })}
 
-          {/* Polígono da média */}
           <polygon
             points={mediaPolygon}
             fill="rgba(196, 0, 0, 0.3)"
@@ -120,7 +117,6 @@ export default function RadarChart({ data }: RadarChartProps) {
             strokeWidth={2}
           />
 
-          {/* Polígono do usuário */}
           <polygon
             points={userPolygon}
             fill="rgba(5, 138, 255, 0.4)"
@@ -128,7 +124,6 @@ export default function RadarChart({ data }: RadarChartProps) {
             strokeWidth={2}
           />
 
-          {/* Pontos interativos */}
           {userPoints.map((p, i) => (
             <circle
               key={`user-${i}`}

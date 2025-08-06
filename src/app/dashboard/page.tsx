@@ -46,7 +46,7 @@ export default function Dashboard(){
   };
 
   return (
-    <div className='flex flex-col w-full space-y-8 md:space-y-12 pb-40 bg-bleached-silk  dark:bg-gunmetal'>
+    <div className='flex flex-col w-full space-y-8 md:space-y-12 pb-40 bg-bleached-silk dark:bg-gunmetal'>
       
       <div className='p-10 text-center'>
         <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-royal-blue border-b-2 border-teal-primary pb-2 text-center dark:text-blue-darknut">
