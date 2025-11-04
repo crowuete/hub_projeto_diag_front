@@ -10,7 +10,7 @@ export default function Footer() {
                 <p className="my-5 leading-normal">
                     Universidade Estadual de Maringá
                     <br />
-                    Bloco C23, Sala 3
+                    Bloco A01, Sala 14
                     <br />
                     Maringá, PR, Brasil
                 </p>
